@@ -139,3 +139,4 @@ dkms.conf
 # Setting the ignorance for project structure
 resource/input/*
 !resource/input/.gitkeep
+.idea/
