@@ -147,7 +147,6 @@ char *new_buffer(char *buffer, int new_buffer_size)
 {
     char *new_buff = ALLOC_SRT(new_buffer_size);
     strcpy(new_buff, buffer);
-    free(buffer);
     return new_buff;
 }
 
