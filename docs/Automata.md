@@ -4,7 +4,6 @@ For error checking of queries an FSM is used. The table of this fsm is stored in
 ~~~
 TokenTypesCount
 StateCount
-TokenType1  TokenType2  ... TokenTypeN
 Action11    Action12    ... Action1N
 .           .           ... 
 .           .           ...
