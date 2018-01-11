@@ -94,6 +94,11 @@ LLList list_of_content_files(char *path)
 void scan_file(char *path, void (*call_back)(char *))
 {
     FILE *file = fopen(path, "r");
+    if (file == NULL)
+    {
+        printf("File %s not found\n", path);
+        exit(-1);
+    }
     char c;
 
     char *buffer;
