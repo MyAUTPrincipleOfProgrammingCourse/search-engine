@@ -1,6 +1,7 @@
 #include "parse.h"
 #include "../util/lllist/lllist.h"
 #include "../util/llstack/llstack.h"
+#include "../bst/bst.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -107,6 +108,7 @@ void scan_file(char *path)
             {
                 buffer[buffer_used] = '\0';
                 printf("%s\n", buffer);
+                bst_add(buffer, path);
                 buffer_size = DEFAULT_BUFFER_SIZE;
                 buffer_used = 0;
                 buffer = ALLOC_SRT(buffer_size);
