@@ -15,8 +15,10 @@ typedef struct {
     int repeat;
 } *WordFileRepeatStat, WordFileRepeatStat_t;
 
-BSTNode root;
+BSTNode bst_root;
 
-bst_add(char *, char *);
+void bst_init();
+void bst_add(char *, char *);
 
+void bst_add_repeat_file_to_words_files(LLList, char *);
 #endif //SEARCH_ENGINE_BST_H
