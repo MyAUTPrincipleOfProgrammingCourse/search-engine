@@ -15,8 +15,21 @@ void scan_dir(char * path)
     lllist_go_first(file_list);
     do
     {
-        printf("file %s: \n", lllist_get_current(file_list));
-        scan_file(lllist_get_current(file_list));
+        char *file_path = lllist_get_current(file_list);
+        void add_to_bst(char *word)
+        {
+            int compare_in_stop_words(LLListData data)
+            {
+                char *stop_word_item = data;
+                return strcmp(word, stop_word_item);
+            }
+
+            LLListData r = lllist_search(stop_words, &compare_in_stop_words);
+            if (r == NULL) // Not found in stop words so add it to bst
+                bst_add(word, file_path);
+        }
+        printf("file %s: \n", file_path);
+        scan_file(file_path, &add_to_bst);
     }
     while (lllist_step_forward(file_list));
 
@@ -78,7 +91,7 @@ LLList list_of_content_files(char *path)
     return files_list;
 }
 
-void scan_file(char *path)
+void scan_file(char *path, void (*call_back)(char *))
 {
     FILE *file = fopen(path, "r");
     char c;
@@ -96,7 +109,6 @@ void scan_file(char *path)
         if (c != '\0')
         {
             buffer[buffer_used++] = c;
-//            printf("%c", c);
             if (buffer_used == buffer_size - 2)
             {
                 buffer = new_buffer(buffer, buffer_size += 2);
@@ -107,8 +119,7 @@ void scan_file(char *path)
             if (buffer_used != 0)
             {
                 buffer[buffer_used] = '\0';
-                printf("%s\n", buffer);
-                bst_add(buffer, path);
+                call_back(buffer);
                 buffer_size = DEFAULT_BUFFER_SIZE;
                 buffer_used = 0;
                 buffer = ALLOC_SRT(buffer_size);
@@ -120,8 +131,10 @@ void scan_file(char *path)
 
 char valid_char(char c)
 {
-    if ((c >= 'a' && c <= 'z') || ((c >= 'A' && c <= 'Z')))
+    if (c >= 'a' && c <= 'z')
         return c;
+    else if (c >= 'A' && c <= 'Z')
+        return c - 'A' + 'a';
     else
         return '\0';
 }
@@ -132,4 +145,15 @@ char *new_buffer(char *buffer, int new_buffer_size)
     strcpy(new_buff, buffer);
     free(buffer);
     return new_buff;
+}
+
+void scan_stop_words(char *path)
+{
+    lllist_init(&stop_words);
+    void new_stop_words(char *stop_word)
+    {
+        lllist_push_front(stop_words, stop_word);
+    }
+
+    scan_file(path, &new_stop_words);
 }
