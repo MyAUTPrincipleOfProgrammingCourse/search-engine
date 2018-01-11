@@ -3,6 +3,8 @@
 
 #include "../util/lllist/lllist.h"
 
+#define ALLOC_SRT(N) malloc(N * sizeof(char))
+
 #define DEFAULT_BUFFER_SIZE 10
 
 LLList stop_words;

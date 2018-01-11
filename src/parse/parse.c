@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <dirent.h>
 
-#define ALLOC_SRT(N) malloc(N * sizeof(char))
 
 void scan_dir(char * path)
 {
