@@ -128,8 +128,17 @@ void lllist_concat(LLList list1, LLList list2)
     list1->__last_node = list2->__last_node;
 }
 
-LLListData lllist_search(LLList lllist1, LLList lllist2, int (*compare_function)(LLListData, LLListData))
+LLListData lllist_search(LLList lllist, int (*compare_function)(LLListData))
 {
+    lllist_go_first(lllist);
+    if (lllist_is_empty(lllist))
+        return NULL;
+    do{
+        int result = compare_function(lllist_get_current(lllist));
+        if (result == 0)
+            return lllist_get_current(lllist);
+    }while (lllist_step_forward(lllist));
+
     return NULL;
 }
 

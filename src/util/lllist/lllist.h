@@ -140,7 +140,7 @@ LLList lllist_union(LLList, LLList, int (*compare_function)(LLListData, LLListDa
  * @param compare_function
  * @return
  */
-LLListData lllist_search(LLList, LLList, int (*compare_function)(LLListData, LLListData));
+LLListData lllist_search(LLList, int (*compare_function)(LLListData));
 
 /**
  * Release the resources allocated to the lllist
