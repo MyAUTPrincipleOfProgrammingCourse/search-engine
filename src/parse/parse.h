@@ -9,9 +9,9 @@
 
 LLList stop_words;
 
-void scan_dir(char *);
+void scan_dir(char * path, void (*new_word_found_file_cb)(char *word, char *file_path));
 void scan_file(char *, void (*call_back)(char *));
-void scan_stop_words(char *);
+
 LLList list_of_content_files(char *);
 char valid_char(char);
 

@@ -1,34 +1,27 @@
 #include "parse.h"
 #include "../util/lllist/lllist.h"
 #include "../util/llstack/llstack.h"
-#include "../bst/bst.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <dirent.h>
 
 
-void scan_dir(char * path)
+void scan_dir(char * path, void (*new_word_found_file_cb)(char *word, char *file_path))
 {
     LLList file_list = list_of_content_files(path);
     lllist_go_first(file_list);
     do
     {
         char *file_path = lllist_get_current(file_list);
-        void add_to_bst(char *word)
-        {
-            int compare_in_stop_words(LLListData data)
-            {
-                char *stop_word_item = data;
-                return strcmp(word, stop_word_item);
-            }
 
-            LLListData r = lllist_search(stop_words, &compare_in_stop_words);
-            if (r == NULL) // Not found in stop words so add it to bst
-                bst_add(word, file_path);
+        void new_word_cb(char *word)
+        {
+            new_word_found_file_cb(word, file_path);
         }
+
         printf("file %s: \n", file_path);
-        scan_file(file_path, &add_to_bst);
+        scan_file(file_path, &new_word_cb);
     }
     while (lllist_step_forward(file_list));
 
@@ -148,15 +141,4 @@ char *new_buffer(char *buffer, int new_buffer_size)
     char *new_buff = ALLOC_SRT(new_buffer_size);
     strcpy(new_buff, buffer);
     return new_buff;
-}
-
-void scan_stop_words(char *path)
-{
-    lllist_init(&stop_words);
-    void new_stop_words(char *stop_word)
-    {
-        lllist_push_front(stop_words, stop_word);
-    }
-
-    scan_file(path, &new_stop_words);
 }
