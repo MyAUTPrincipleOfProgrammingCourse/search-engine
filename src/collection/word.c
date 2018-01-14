@@ -108,3 +108,19 @@ void print_stop_word_collection()
 
     bst_inorder(stop_words_bst, &print_function);
 }
+
+LLList get_word_list(char *word)
+{
+    Word t = malloc(sizeof(Word_t));
+    t->word = malloc((strlen(word) + 1) * sizeof(char));
+    strcpy(t->word, word);
+    Word  w = bst_search(words_bst, t);
+    if (w)
+        return w->files_list;
+    else
+    {
+        LLList empty_list;
+        lllist_init(&empty_list);
+        return empty_list;
+    }
+}

@@ -19,6 +19,8 @@ void init_stop_word_collection(char *);
 void print_word_collection();
 void print_stop_word_collection();
 
+LLList get_word_list(char *);
+
 int word_cmp(Word, Word);
 
 #endif //SEARCH_ENGINE_WORD_H
