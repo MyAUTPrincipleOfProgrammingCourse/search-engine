@@ -150,3 +150,25 @@ LLList lllist_union(LLList lllist1, LLList lllist2, int (*compare_function)(LLLi
     if (lllist_is_empty(lllist1) || lllist_is_empty(lllist2))
         return result;
 }
+
+LLList lllist_sublist(LLListNode start_item, LLListNode end_item)
+{
+    LLList result_list;
+    lllist_init(&result_list);
+
+    return NULL;
+}
+
+void lllist_cpy(LLList dest, LLList src)
+{
+    if (lllist_is_empty(src))
+        return;
+
+    lllist_go_first(src);
+
+    do
+    {
+        lllist_push_front(dest, lllist_get_current(src));
+    }
+    while (lllist_step_forward(src));
+}

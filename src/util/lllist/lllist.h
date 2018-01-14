@@ -143,6 +143,22 @@ LLList lllist_union(LLList, LLList, int (*compare_function)(LLListData, LLListDa
 LLListData lllist_search(LLList, int (*compare_function)(LLListData));
 
 /**
+ *
+ * @param start_item
+ * @param end_item
+ * @return
+ */
+LLList lllist_sublist(LLListNode, LLListNode);
+
+/**
+ * Copy the content of the source to the dest list
+ * Caution: Dest list should be inited.
+ * @param dest Destination of the copy operation
+ * @param src Source of the copy operation
+ */
+void lllist_cpy(LLList dest, LLList src);
+
+/**
  * Release the resources allocated to the lllist
  * @param lllist The lllist that should be un allocate from the memory
  */
