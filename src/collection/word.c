@@ -19,11 +19,11 @@ void init_word_collection(char *path)
 
     void new_word(char *word, char *file)
     {
-//        printf("\"%s\" in %s\n", word, file);
         if (!bst_search(stop_words_bst, word))              // Check if the word is not a stop word
         {
             Word temp = malloc(sizeof(Word_t));
             temp->word = malloc((strlen(word) + 1 ) * sizeof(char));
+            strcpy(temp->word, word);
 
             Word w = bst_search(words_bst, temp);           // Search for the word if it is existed in the bst
             if (w == NULL)                                  // Check if the word is not found
@@ -41,8 +41,6 @@ void init_word_collection(char *path)
             }
             else
             {
-                printf("This is log print\n");
-
                 // Function for check if this file is in list
                 int compare_file_name(WordFileRepeatStat repeat) { return strcmp(repeat->file_name, file); }
 
