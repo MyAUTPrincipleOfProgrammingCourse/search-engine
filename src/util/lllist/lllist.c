@@ -172,3 +172,26 @@ void lllist_cpy(LLList dest, LLList src)
     }
     while (lllist_step_forward(src));
 }
+
+LLList lllist_complement(LLList lllist, LLList universe, int (*compare_function)(LLListData, LLListData))
+{
+    LLList result;
+    lllist_init(&result);
+
+    lllist_go_first(universe);
+
+    do
+    {
+        int cmp(LLListData data)
+        {
+            return compare_function(data, lllist_get_current(universe));
+        }
+
+        LLListData founded = lllist_search(lllist, &cmp);
+        if (founded == NULL)        // If not in the list
+            lllist_push_front(result, lllist_get_current(universe));
+    }
+    while(lllist_step_forward(universe));
+
+    return result;
+}

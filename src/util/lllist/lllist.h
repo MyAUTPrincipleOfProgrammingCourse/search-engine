@@ -159,6 +159,15 @@ LLList lllist_sublist(LLListNode, LLListNode);
 void lllist_cpy(LLList dest, LLList src);
 
 /**
+ *
+ * @param lllist
+ * @param universe
+ * @param compare_function
+ * @return
+ */
+LLList lllist_complement(LLList lllist, LLList universe, int (*compare_function)(LLListData, LLListData));
+
+/**
  * Release the resources allocated to the lllist
  * @param lllist The lllist that should be un allocate from the memory
  */
