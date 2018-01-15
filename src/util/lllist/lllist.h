@@ -118,14 +118,14 @@ void lllist_go_last(LLList);
 void lllist_go_first(LLList lllist);
 
 /**
- *
+ * Concat the list2 to the list1
  * @param lllist1
  * @param lllist2
  */
 void lllist_concat(LLList, LLList);
 
 /**
- *
+ * Union two lists elements. (Each item that is in list1 or list2)
  * @param list1
  * @param list2
  * @param compare_function
@@ -134,8 +134,17 @@ void lllist_concat(LLList, LLList);
 LLList lllist_union(LLList, LLList, int (*compare_function)(LLListData, LLListData));
 
 /**
- *
+ * Intersects two lists elements. (Each item that is in list1 and list2)
  * @param list1
+ * @param list2
+ * @param compare_function
+ * @return
+ */
+LLList lllist_intersect(LLList list1, LLList list2, int (*compare_function)(LLListData, LLListData));
+
+
+/**
+ * Search the list and runs the compare_function on each item of list
  * @param list2
  * @param compare_function
  * @return
