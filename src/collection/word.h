@@ -21,6 +21,10 @@ void print_stop_word_collection();
 
 LLList get_word_list(char *);
 
+void make_universe_set_file_list();
+
 int word_cmp(Word, Word);
+
+int file_repaet_cmp(WordFileRepeatStat, WordFileRepeatStat);
 
 #endif //SEARCH_ENGINE_WORD_H
