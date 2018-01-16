@@ -7,6 +7,8 @@
 BST words_bst;
 BST stop_words_bst;
 
+LLList universe_file_list;
+
 int word_cmp(Word w1, Word w2)
 {
     return strcmp(w1->word, w2->word);
@@ -66,6 +68,7 @@ void init_word_collection(char *path)
     // Scan the dir path and when a new word found, "new_word" function is called
     scan_dir(path, &new_word);
 
+    make_universe_set_file_list();
 }
 
 void init_stop_word_collection(char *path)
@@ -123,4 +126,32 @@ LLList get_word_list(char *word)
         lllist_init(&empty_list);
         return empty_list;
     }
+}
+
+
+void make_universe_set_file_list()
+{
+    /**
+     * This function will make the universe set of files list for the not operator in query evaluation
+     */
+    extern LLList file_list;
+
+    lllist_init(&universe_file_list);
+
+    lllist_go_first(file_list);
+    do
+    {
+        char *s = lllist_get_current(file_list);
+        WordFileRepeatStat r = malloc(sizeof(WordFileRepeatStat_t));
+        r->file_name = malloc((strlen(s) + 1) * sizeof(char));
+        strcpy(r->file_name, s);
+        r->repeat = 0;
+        lllist_push_front(universe_file_list, r);
+    }
+    while (lllist_step_forward(file_list));
+}
+
+int file_repaet_cmp(WordFileRepeatStat s1, WordFileRepeatStat s2)
+{
+    return strcmp(s1->file_name, s2->file_name);
 }
