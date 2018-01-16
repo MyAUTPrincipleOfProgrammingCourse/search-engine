@@ -122,10 +122,22 @@ void lllist_concat(LLList list1, LLList list2)
 {
     if ((!list1) && (!list2))
         return;
-    list1->__last_node->__ll_next = list2->__first_node;
-    list2->__first_node->__ll_last = list1->__last_node;
-    list1->size += list2->size;
-    list1->__last_node = list2->__last_node;
+    else if (lllist_is_empty(list1))
+    {
+        list1->size = list2->size;
+        list1->__last_node = list2->__last_node;
+        list1->__first_node = list2->__first_node;
+        list1->__current_node = list2->__current_node;
+    }
+    else if (lllist_is_empty(list2))
+        return;
+    else
+    {
+        list1->__last_node->__ll_next = list2->__first_node;
+        list2->__first_node->__ll_last = list1->__last_node;
+        list1->size += list2->size;
+        list1->__last_node = list2->__last_node;
+    }
 }
 
 LLListData lllist_search(LLList lllist, int (*compare_function)(LLListData))
@@ -142,13 +154,51 @@ LLListData lllist_search(LLList lllist, int (*compare_function)(LLListData))
     return NULL;
 }
 
-LLList lllist_union(LLList lllist1, LLList lllist2, int (*compare_function)(LLListData, LLListData))
+LLList lllist_union(LLList list1, LLList list2, int (*compare_function)(LLListData, LLListData))
 {
-    LLList result;
-    lllist_init(&result);
+    LLList intersect = lllist_intersect(list1, list2, compare_function);    // List of items that are both in list1 and list2
 
-    if (lllist_is_empty(lllist1) || lllist_is_empty(lllist2))
-        return result;
+    LLList list1_prime, list2_prime;    // List of the items that are not in list1 or list2
+
+    lllist_init(&list1_prime);
+    lllist_init(&list2_prime);
+
+    lllist_go_first(list1);
+
+    do
+    {
+        LLListData list1_item = lllist_get_current(list1);
+
+        int search_function(LLListData data)
+        {
+            return compare_function(list1_item, data);
+        }
+
+        if (lllist_search(intersect, &search_function) == NULL)
+            lllist_push_front(list1_prime, list1_item);
+
+    }
+    while (lllist_step_forward(list1));
+
+    lllist_go_first(list2);
+
+    do
+    {
+        LLListData list2_item = lllist_get_current(list2);
+        int search_function(LLListData data)
+        {
+            return compare_function(list2_item, data);
+        }
+
+        if (lllist_search(intersect, &search_function) == NULL)
+            lllist_push_front(list2_prime, list2_item);
+    }
+    while (lllist_step_forward(list2));
+
+    lllist_concat(intersect, list1_prime);
+    lllist_concat(intersect, list2_prime);
+
+    return intersect;
 }
 
 LLList lllist_sublist(LLListNode start_item, LLListNode end_item)
@@ -194,4 +244,38 @@ LLList lllist_complement(LLList lllist, LLList universe, int (*compare_function)
     while(lllist_step_forward(universe));
 
     return result;
+}
+
+LLList lllist_intersect(LLList list1, LLList list2, int (*compare_function)(LLListData, LLListData))
+{
+    LLList result;
+    lllist_init(&result);
+
+    // Check the lists whether non of them is empty
+    if (lllist_is_empty(list1) || lllist_is_empty(list2))
+        return result;
+
+    lllist_go_first(list1);
+
+    do
+    {
+        LLListData list1_item = lllist_get_current(list1);
+        lllist_go_first(list2);
+        do
+        {
+            LLListData list2_item = lllist_get_current(list2);
+
+            if (compare_function(list1_item, list2_item) == 0)
+                lllist_push_front(result, list1_item);
+        }
+        while (lllist_step_forward(list2));
+    }
+    while (lllist_step_forward(list1));
+
+    return result;
+}
+
+size_t lllist_get_size(LLList lllist)
+{
+    return lllist->size;
 }

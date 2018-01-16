@@ -40,6 +40,13 @@ void lllist_init(LLList *);
 bool lllist_is_empty(LLList);
 
 /**
+ * Returns the size of the list
+ * @param lllist
+ * @return
+ */
+size_t lllist_get_size(LLList);
+
+/**
  * Returns whether the current of list is at last or not
  * @param lllist The list to be checked if it is empty or not
  * @return The emptiness of the list
