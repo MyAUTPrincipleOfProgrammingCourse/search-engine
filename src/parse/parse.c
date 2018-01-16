@@ -4,12 +4,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <dirent.h>
 
+LLList file_list;
 
 void scan_dir(char * path, void (*new_word_found_file_cb)(char *word, char *file_path))
 {
-    LLList file_list = list_of_content_files(path);
+    file_list = list_of_content_files(path);
     lllist_go_first(file_list);
     do
     {
@@ -33,7 +33,7 @@ LLList list_of_content_files(char *path)
     LLList files_list;
     lllist_init(&files_list);
 
-    // Stack for
+    // Stack for directory
     LLStack dir_stack;
     llstack_init(&dir_stack);
 
@@ -75,7 +75,7 @@ LLList list_of_content_files(char *path)
         }
     }
 #else
-    // TODO implement for other OSs
+    // TODO add implementation for other OSs
 #endif
 
     llstack_release(dir_stack);
