@@ -7,7 +7,7 @@ int main(int argc, char **argv)
 {
     load_error_check_automata();        // Load the automata table from the file "resource/automata-table"
 
-    char *files_path = "/home/ahmad/CLionProjects/search-engine/resource/input/content"; // Path of the directory of the files
+    char *files_path = "../resource/input/content"; // Path of the directory of the files
     char *stop_words_path = "../resource/input/stopwords.txt";                           // Path of the stop words file
 
     init_stop_word_collection(stop_words_path);                                          // Init the bst of stop words
