@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include "query.h"
 #include "../parse/parse.h"
+#include "../util/llstack/llstack.h"
+#include "../collection/word.h"
+#include <limits.h>
 
 int **table;
 void (*state_functions[6])(query_char_type);
@@ -51,7 +54,21 @@ void start_query_get() {
             } while (lllist_step_forward(tokens_list));
             bool is_correct = query_error_check(tokens_list);
             if (is_correct)
-                printf("Query is correct\n");
+            {
+                printf("Query is correct.\nEvaluating the result of query:\n");
+                LLList result = query_evaluate(tokens_list);
+                printf("File path\t\t\t\t\tRepeat count\n");
+                if (!lllist_is_empty(result))
+                {
+                    lllist_go_first(result);
+                    do
+                    {
+                        WordFileRepeatStat s = lllist_get_current(result);
+                        printf("%s\t\t\t%d",s->file_name, s->repeat);
+                    }
+                    while (lllist_step_forward(result));
+                }
+            }
             else
                 printf("Query is not correct\n");
         }
@@ -59,15 +76,15 @@ void start_query_get() {
 }
 
 LLList query_tokenize(char *query) {
-    LLList tokens_list;
+    LLList tokens_list;             // List of tokens of query
 
-    lllist_init(&tokens_list);
+    lllist_init(&tokens_list);      // Init the list of tokens
 
-    char *buffer;
-    int buffer_size = DEFAULT_BUFFER_SIZE;
-    int buffer_used = 0;
+    char *buffer;                   // Buffer for tokenizing the query
+    int buffer_size = DEFAULT_BUFFER_SIZE;  // Size of the buffer is the default for the start of tokenizing
+    int buffer_used = 0;            // Variable to indicate the usage of buffer
 
-    buffer = ALLOC_SRT(buffer_size);
+    buffer = ALLOC_SRT(buffer_size);    // Allocate the memory for buffer
 
     query_char_type last_char_type = QUERY_TOKEN_TYPE_WHITE_SPACE;
 
@@ -106,6 +123,7 @@ LLList query_tokenize(char *query) {
             lllist_push_front(tokens_list, token);
         } else if (char_type == QUERY_TOKEN_TYPE_WHITE_SPACE) {
             if (buffer_used != 0) {
+                buffer[buffer_used] = '\0';
                 buffer_used = 0;
                 buffer_size = DEFAULT_BUFFER_SIZE;
                 QueryToken token = malloc(sizeof(QueryToken_t));
@@ -128,6 +146,7 @@ LLList query_tokenize(char *query) {
     }
 
     if (buffer_used != 0) {
+        buffer[buffer_used] = '\0';
         QueryToken token = malloc(sizeof(QueryToken_t));
         token->value = ALLOC_SRT(strlen(buffer) + 1);
         strcpy(token->value, buffer);
@@ -211,7 +230,8 @@ void s5(query_char_type type)
     parenthesis--;
 }
 
-void load_error_check_automata() {
+void load_error_check_automata()
+{
     FILE *automata_file = fopen(ERROR_CHECK_AUTOMATA_FILE_PATH, "r");
     if (automata_file == NULL)
     {
@@ -244,4 +264,154 @@ void load_error_check_automata() {
     state_functions[3] = &s3;
     state_functions[4] = &s4;
     state_functions[5] = &s5;
+}
+
+/**
+ * Function of the operator priority
+ * @param operator
+ * @return
+ */
+int op_pri(char *operator)
+{
+    if      (strcmp(operator, "(") == 0) return INT_MIN;
+    else if (strcmp(operator, "&") == 0) return 5;
+    else if (strcmp(operator, "|") == 0) return 3;
+    else if (strcmp(operator, "^") == 0) return 4;
+    else if (strcmp(operator, ")") == 0) return INT_MAX;
+}
+
+LLList evaluate_exp(LLList operand1, LLList operand2, char *operator)
+{
+    if      (strcmp(operator, "&") == 0) return lllist_intersect(operand1, operand2, &file_repaet_cmp);
+    else if (strcmp(operator, "|") == 0) return lllist_union(operand1, operand2, &file_repaet_cmp);
+    else if (strcmp(operator, "^") == 0) return 4;
+
+}
+
+LLList query_evaluate(LLList tokens)
+{
+    typedef struct Operator
+    {
+        char *oper;
+        int priority;
+        bool _is_not;
+    } *Operator, Operator_t;
+
+
+    LLStack operand_stack;
+    LLStack operator_stack;
+
+    llstack_init(&operand_stack);           // Init the operands stack
+    llstack_init(&operator_stack);          // Init the operator stack
+
+    lllist_go_first(tokens);                // Set the pointer of the tokens list to the first
+
+    bool is_not_seen = false;
+
+
+
+    int cmp(WordFileRepeatStat s1, WordFileRepeatStat s2) { return strcmp(s1->file_name, s2->file_name); }
+
+    extern LLList universe_file_list;
+
+    do
+    {
+        QueryToken t = lllist_get_current(tokens);
+
+        if (t->type == QUERY_TOKEN_TYPE_UNARY_OPERATOR)
+            is_not_seen = !is_not_seen;
+        else if (t->type == QUERY_TOKEN_TYPE_IDENTIFIER)
+        {
+            if (is_not_seen == true)
+            {
+                llstack_push(operand_stack,
+                             lllist_complement(get_word_list(t->value), universe_file_list, &cmp)
+                );
+                is_not_seen = false;
+            }
+            else
+            {
+                LLList list1 = get_word_list(t->value);
+
+                lllist_go_first(list1);
+                do
+                {
+                    WordFileRepeatStat s = lllist_get_current(list1);
+                    printf("%s\t\t\t%d",s->file_name, s->repeat);
+                }
+                while (lllist_step_forward(list1));
+
+                llstack_push(operand_stack, get_word_list(t->value));
+            }
+        }
+        else if (t->type == QUERY_TOKEN_TYPE_BINARY_OPERATOR)
+        {
+            if (llstack_is_empty(operator_stack))
+            {
+                Operator o = malloc(sizeof(Operator_t));
+                o->oper = t->value;
+                o->priority = op_pri(t->value);
+
+                llstack_push(operator_stack, o);
+            }
+            else
+            {
+                while ((!llstack_is_empty(operand_stack)) && (((Operator)llstack_top(operator_stack))->priority > op_pri(t->value)))
+                {
+                    LLList operand1, operand2, result;
+                    operand2 = llstack_top_pop(operand_stack);
+                    operand1 = llstack_top_pop(operand_stack);
+                    Operator operator = llstack_top_pop(operator_stack);
+                    result = evaluate_exp(operand1, operand2, operator->oper);
+                    llstack_push(operand_stack, result);
+                }
+            }
+        }
+        else if (t->type == QUERY_TOKEN_TYPE_OPEN_PARENTHESIS)
+        {
+            Operator o = malloc(sizeof(Operator_t));
+            o->oper = malloc((strlen(t->value) + 1) * sizeof(char));
+            strcpy(o->oper, t->value);
+            o->priority = op_pri(t->value);
+            o->_is_not = is_not_seen;
+            llstack_push(operator_stack, o);
+        }
+        else if (t->type == QUERY_TOKEN_TYPE_CLOSE_PARENTHESIS)
+        {
+            while (strcmp(((Operator)llstack_top(operator_stack))->oper, "(") != 0)
+            {
+                LLList operand1, operand2, result;
+                operand2 = llstack_top_pop(operand_stack);
+                operand1 = llstack_top_pop(operand_stack);
+                Operator operator = llstack_top_pop(operator_stack);
+                result = evaluate_exp(operand1, operand2, operator->oper);
+                llstack_push(operand_stack, result);
+            }
+
+            if (((Operator)llstack_top(operator_stack))->_is_not)
+                llstack_push(operand_stack, lllist_complement(llstack_top_pop(operand_stack), universe_file_list, &cmp));
+            llstack_pop(operator_stack);
+        }
+    }
+    while (lllist_step_forward(tokens));
+
+    while (!llstack_is_empty(operator_stack))
+    {
+        LLList operand1, operand2, result;
+        operand2 = llstack_top_pop(operand_stack);
+        operand1 = llstack_top_pop(operand_stack);
+        Operator operator = llstack_top_pop(operator_stack);
+        result = evaluate_exp(operand1, operand2, operator->oper);
+        llstack_push(operand_stack, result);
+    }
+
+    lllist_go_first(llstack_top(operand_stack));
+    do
+    {
+        WordFileRepeatStat s = lllist_get_current(llstack_top(operand_stack));
+        printf("%s\t\t\t%d",s->file_name, s->repeat);
+    }
+    while (lllist_step_forward(llstack_top(operand_stack)));
+
+    return llstack_top_pop(operand_stack);
 }
