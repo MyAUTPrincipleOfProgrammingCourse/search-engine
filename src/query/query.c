@@ -64,7 +64,7 @@ void start_query_get() {
                     do
                     {
                         WordFileRepeatStat s = lllist_get_current(result);
-                        printf("%s\t\t\t%d",s->file_name, s->repeat);
+                        printf("%s\t\t\t%d\n",s->file_name, s->repeat);
                     }
                     while (lllist_step_forward(result));
                 }
@@ -106,6 +106,7 @@ LLList query_tokenize(char *query) {
                 char_type == QUERY_TOKEN_TYPE_BINARY_OPERATOR
                 ) {
             if (buffer_used != 0) {
+                buffer[buffer_used] = '\0';
                 buffer_used = 0;
                 buffer_size = DEFAULT_BUFFER_SIZE;
                 QueryToken ltoken = malloc(sizeof(QueryToken_t));
@@ -282,8 +283,8 @@ int op_pri(char *operator)
 
 LLList evaluate_exp(LLList operand1, LLList operand2, char *operator)
 {
-    if      (strcmp(operator, "&") == 0) return lllist_intersect(operand1, operand2, &file_repaet_cmp);
-    else if (strcmp(operator, "|") == 0) return lllist_union(operand1, operand2, &file_repaet_cmp);
+    if      (strcmp(operator, "&") == 0) return lllist_intersect(operand1, operand2, &file_repeat_cmp);
+    else if (strcmp(operator, "|") == 0) return lllist_union(operand1, operand2, &file_repeat_cmp);
     else if (strcmp(operator, "^") == 0) return 4;
 
 }
@@ -333,13 +334,13 @@ LLList query_evaluate(LLList tokens)
             {
                 LLList list1 = get_word_list(t->value);
 
-                lllist_go_first(list1);
-                do
-                {
-                    WordFileRepeatStat s = lllist_get_current(list1);
-                    printf("%s\t\t\t%d",s->file_name, s->repeat);
-                }
-                while (lllist_step_forward(list1));
+//                lllist_go_first(list1);
+//                do
+//                {
+//                    WordFileRepeatStat s = lllist_get_current(list1);
+//                    printf("%s\t\t\t%d",s->file_name, s->repeat);
+//                }
+//                while (lllist_step_forward(list1));
 
                 llstack_push(operand_stack, get_word_list(t->value));
             }
@@ -356,8 +357,11 @@ LLList query_evaluate(LLList tokens)
             }
             else
             {
-                while ((!llstack_is_empty(operand_stack)) && (((Operator)llstack_top(operator_stack))->priority > op_pri(t->value)))
+                while (!llstack_is_empty(operand_stack))
                 {
+                    if (((Operator)llstack_top(operator_stack))->priority > op_pri(t->value))
+                        break;
+
                     LLList operand1, operand2, result;
                     operand2 = llstack_top_pop(operand_stack);
                     operand1 = llstack_top_pop(operand_stack);
@@ -405,13 +409,13 @@ LLList query_evaluate(LLList tokens)
         llstack_push(operand_stack, result);
     }
 
-    lllist_go_first(llstack_top(operand_stack));
-    do
-    {
-        WordFileRepeatStat s = lllist_get_current(llstack_top(operand_stack));
-        printf("%s\t\t\t%d",s->file_name, s->repeat);
-    }
-    while (lllist_step_forward(llstack_top(operand_stack)));
+//    lllist_go_first(llstack_top(operand_stack));
+//    do
+//    {
+//        WordFileRepeatStat s = lllist_get_current(llstack_top(operand_stack));
+//        printf("%s\t\t\t%d",s->file_name, s->repeat);
+//    }
+//    while (lllist_step_forward(llstack_top(operand_stack)));
 
     return llstack_top_pop(operand_stack);
 }
