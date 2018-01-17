@@ -25,6 +25,6 @@ void make_universe_set_file_list();
 
 int word_cmp(Word, Word);
 
-int file_repaet_cmp(WordFileRepeatStat, WordFileRepeatStat);
+int file_repeat_cmp(WordFileRepeatStat, WordFileRepeatStat);
 
 #endif //SEARCH_ENGINE_WORD_H

@@ -156,7 +156,7 @@ void make_universe_set_file_list()
     while (lllist_step_forward(file_list));
 }
 
-int file_repaet_cmp(WordFileRepeatStat s1, WordFileRepeatStat s2)
+int file_repeat_cmp(WordFileRepeatStat s1, WordFileRepeatStat s2)
 {
     return strcmp(s1->file_name, s2->file_name);
 }
