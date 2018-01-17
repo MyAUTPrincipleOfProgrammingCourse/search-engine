@@ -27,6 +27,8 @@ char *read_line();
 void start_query_get();
 LLList query_tokenize(char *);
 
+LLList query_evaluate(LLList);
+
 query_char_type get_query_char_type(char);
 
 #endif //SEARCH_ENGINE_QUERY_H
