@@ -118,10 +118,15 @@ LLList get_word_list(char *word)
     t->word = malloc((strlen(word) + 1) * sizeof(char));
     strcpy(t->word, word);
     Word  w = bst_search(words_bst, t);
+
     if (w)
+    {
+        printf("Word %s is founded\n", word);
         return w->files_list;
+    }
     else
     {
+        printf("Word %s is NOT founded\n", word);
         LLList empty_list;
         lllist_init(&empty_list);
         return empty_list;
