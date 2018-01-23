@@ -379,7 +379,7 @@ LLList query_evaluate(LLList tokens)
             {
                 while (!llstack_is_empty(operand_stack))
                 {
-                    if (((Operator)llstack_top(operator_stack))->priority > op_pri(t->value))
+                    if (((Operator)llstack_top(operator_stack))->priority < op_pri(t->value))
                         break;
 
                     LLList operand1, operand2, result;
