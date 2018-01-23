@@ -149,6 +149,14 @@ LLList lllist_union(LLList, LLList, int (*compare_function)(LLListData, LLListDa
  */
 LLList lllist_intersect(LLList list1, LLList list2, int (*compare_function)(LLListData, LLListData));
 
+/**
+ * Calculate the delta of lists. (Each item that is either in list1 or list2 not both)
+ * @param list1
+ * @param list2
+ * @param compare_function
+ * @return
+ */
+LLList lllist_delta(LLList list1, LLList list2, int (*compare_function)(LLListData, LLListData));
 
 /**
  * Search the list and runs the compare_function on each item of list

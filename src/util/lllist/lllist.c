@@ -308,3 +308,69 @@ size_t lllist_get_size(LLList lllist)
 {
     return lllist->size;
 }
+
+LLList lllist_delta(LLList list1, LLList list2, int (*compare_function)(LLListData, LLListData))
+{
+    LLList result;
+    LLList intersect = lllist_intersect(list1, list2, compare_function);    // List of items that are both in list1 and list2
+
+    LLList list1_prime, list2_prime;    // List of the items that are not in list1 or list2
+
+    lllist_init(&result);
+    lllist_init(&list1_prime);
+    lllist_init(&list2_prime);
+
+    lllist_go_first(list1);
+
+    do
+    {
+        LLListData list1_item = lllist_get_current(list1);
+
+        int search_function(LLListData data)
+        {
+            return compare_function(list1_item, data);
+        }
+
+        if (lllist_search(intersect, &search_function) == NULL)
+            lllist_push_front(list1_prime, list1_item);
+
+    }
+    while (lllist_step_forward(list1));
+
+    lllist_go_first(list2);
+
+    do
+    {
+        LLListData list2_item = lllist_get_current(list2);
+        int search_function(LLListData data)
+        {
+            return compare_function(list2_item, data);
+        }
+
+        if (lllist_search(intersect, &search_function) == NULL)
+            lllist_push_front(list2_prime, list2_item);
+    }
+    while (lllist_step_forward(list2));
+
+    if (!lllist_is_empty(list1_prime))
+    {
+        lllist_go_first(list1_prime);
+        do
+        {
+            lllist_push_front(result, lllist_get_current(list1_prime));
+        }
+        while (lllist_step_forward(list1_prime));
+    }
+
+    if (!lllist_is_empty(list2_prime))
+    {
+        lllist_go_first(list2_prime);
+        do
+        {
+            lllist_push_front(result, lllist_get_current(list2_prime));
+        }
+        while (lllist_step_forward(list2_prime));
+    }
+
+    return result;
+}
