@@ -328,37 +328,43 @@ LLList lllist_delta(LLList list1, LLList list2, int (*compare_function)(LLListDa
     lllist_init(&list1_prime);
     lllist_init(&list2_prime);
 
-    lllist_go_first(list1);
-
-    do
+    if (!lllist_is_empty(list1))
     {
-        LLListData list1_item = lllist_get_current(list1);
-
-        int search_function(LLListData data)
+        lllist_go_first(list1);
+        do
         {
-            return compare_function(list1_item, data);
+            LLListData list1_item = lllist_get_current(list1);
+
+            int search_function(LLListData data)
+            {
+                return compare_function(list1_item, data);
+            }
+
+            if (lllist_search(intersect, &search_function) == NULL)
+                lllist_push_front(list1_prime, list1_item);
+
         }
-
-        if (lllist_search(intersect, &search_function) == NULL)
-            lllist_push_front(list1_prime, list1_item);
-
+        while (lllist_step_forward(list1));
     }
-    while (lllist_step_forward(list1));
 
-    lllist_go_first(list2);
 
-    do
+    if (!lllist_is_empty(list2))
     {
-        LLListData list2_item = lllist_get_current(list2);
-        int search_function(LLListData data)
+        lllist_go_first(list2);
+        do
         {
-            return compare_function(list2_item, data);
-        }
+            LLListData list2_item = lllist_get_current(list2);
+            int search_function(LLListData data)
+            {
+                return compare_function(list2_item, data);
+            }
 
-        if (lllist_search(intersect, &search_function) == NULL)
-            lllist_push_front(list2_prime, list2_item);
+            if (lllist_search(intersect, &search_function) == NULL)
+                lllist_push_front(list2_prime, list2_item);
+        }
+        while (lllist_step_forward(list2));
     }
-    while (lllist_step_forward(list2));
+
 
     if (!lllist_is_empty(list1_prime))
     {
