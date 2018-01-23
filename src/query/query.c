@@ -92,10 +92,12 @@ LLList query_tokenize(char *query) {
 
     for (size_t i = 0; i < query_len; i++) {
         char c = query[i];
+
         query_char_type char_type = get_query_char_type(c);
 
         if ((last_char_type == char_type) && (char_type == QUERY_TOKEN_TYPE_IDENTIFIER)) {
-            buffer[buffer_used++] = c;
+            buffer[buffer_used++] = ((c >= 'a') && (c <= 'z'))? c : (c - 'A' + 'a');
+
             if (buffer_used == buffer_size - 2) {
                 buffer = new_buffer(buffer, buffer_size += 2);
             }
@@ -137,7 +139,7 @@ LLList query_tokenize(char *query) {
         }
 
         if ((last_char_type != QUERY_TOKEN_TYPE_IDENTIFIER) && char_type == QUERY_TOKEN_TYPE_IDENTIFIER) {
-            buffer[buffer_used++] = c;
+            buffer[buffer_used++] = ((c >= 'a') && (c <= 'z'))? c : (c - 'A' + 'a');
             if (buffer_used == buffer_size - 2) {
                 buffer = new_buffer(buffer, buffer_size += 2);
             }
@@ -298,8 +300,7 @@ LLList evaluate_exp(LLList operand1, LLList operand2, char *operator)
 {
     if      (strcmp(operator, "&") == 0) return lllist_intersect(operand1, operand2, &file_repeat_cmp);
     else if (strcmp(operator, "|") == 0) return lllist_union(operand1, operand2, &file_repeat_cmp);
-    else if (strcmp(operator, "^") == 0) return lllist_delta(operand1, operand2, &file_repeat_cmp);;
-
+    else if (strcmp(operator, "^") == 0) return lllist_delta(operand1, operand2, &file_repeat_cmp);
 }
 
 LLList query_evaluate(LLList tokens)
@@ -382,6 +383,12 @@ LLList query_evaluate(LLList tokens)
                     result = evaluate_exp(operand1, operand2, operator->oper);
                     llstack_push(operand_stack, result);
                 }
+
+                Operator o = malloc(sizeof(Operator_t));
+                o->oper = t->value;
+                o->priority = op_pri(t->value);
+
+                llstack_push(operator_stack, o);
             }
         }
         else if (t->type == QUERY_TOKEN_TYPE_OPEN_PARENTHESIS)
@@ -422,13 +429,16 @@ LLList query_evaluate(LLList tokens)
         llstack_push(operand_stack, result);
     }
 
-//    lllist_go_first(llstack_top(operand_stack));
-//    do
+//    if (!lllist_is_empty(operand_stack))
 //    {
-//        WordFileRepeatStat s = lllist_get_current(llstack_top(operand_stack));
-//        printf("%s\t\t\t%d",s->file_name, s->repeat);
+//        lllist_go_first(llstack_top(operand_stack));
+//        do
+//        {
+//            WordFileRepeatStat s = lllist_get_current(llstack_top(operand_stack));
+//            printf("%s\t\t\t%d",s->file_name, s->repeat);
+//        }
+//        while (lllist_step_forward(llstack_top(operand_stack)));
 //    }
-//    while (lllist_step_forward(llstack_top(operand_stack)));
 
     return llstack_top_pop(operand_stack);
 }
