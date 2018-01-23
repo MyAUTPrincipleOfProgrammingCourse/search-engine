@@ -204,31 +204,34 @@ bool query_error_check(LLList tokens_list)
 void s0(query_char_type type)
 {
     parenthesis = 0;
+    printf("Query lexeme check in state 0\n");
 }
 
 void s1(query_char_type type)
 {
     parenthesis++;
+    printf("Query lexeme check in state 1\n");
 }
 
 void s2(query_char_type type)
 {
-    printf("in state 2\n");
+    printf("Query lexeme check in state 2\n");
 }
 
 void s3(query_char_type type)
 {
-    printf("in state 3\n");
+    printf("Query lexeme check in state 3\n");
 }
 
 void s4(query_char_type type)
 {
-    printf("in state 4\n");
+    printf("Query lexeme check in state 4\n");
 }
 
 void s5(query_char_type type)
 {
     parenthesis--;
+    printf("Query lexeme check in state 5\n");
 }
 
 void load_error_check_automata()
