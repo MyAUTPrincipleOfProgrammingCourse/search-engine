@@ -181,15 +181,25 @@ bool query_error_check(LLList tokens_list)
 
     int current_state = 0;
 
+    QueryToken t;
     while (current_state != -1)
     {
-        QueryToken t = lllist_get_current(tokens_list);
+        t = lllist_get_current(tokens_list);
 
         state_functions[current_state](t->type);
         current_state = table[current_state][t->type];
 
         if (!lllist_step_forward(tokens_list))
             break;
+    }
+
+    if (current_state != -1)
+        state_functions[current_state](t->type);
+
+    if (parenthesis != 0)
+    {
+        printf("Close & Open parenthesis are not the same.\n");
+        return false;
     }
 
     if ((current_state != -1)
@@ -288,7 +298,7 @@ LLList evaluate_exp(LLList operand1, LLList operand2, char *operator)
 {
     if      (strcmp(operator, "&") == 0) return lllist_intersect(operand1, operand2, &file_repeat_cmp);
     else if (strcmp(operator, "|") == 0) return lllist_union(operand1, operand2, &file_repeat_cmp);
-    else if (strcmp(operator, "^") == 0) return 4;
+    else if (strcmp(operator, "^") == 0) return lllist_delta(operand1, operand2, &file_repeat_cmp);;
 
 }
 
