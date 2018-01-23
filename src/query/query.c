@@ -6,6 +6,8 @@
 #include "../collection/word.h"
 #include <limits.h>
 
+//#define CHECK_IF_QUERY_IS_CORRECT
+
 int **table;
 void (*state_functions[6])(query_char_type);
 
@@ -53,7 +55,9 @@ void start_query_get() {
                 printf("%s type %d\n", token->value, token->type);
             } while (lllist_step_forward(tokens_list));
             bool is_correct = query_error_check(tokens_list);
+#ifdef CHECK_IF_QUERY_IS_CORRECT
             if (is_correct)
+#endif
             {
                 printf("Query is correct.\nEvaluating the result of query:\n");
                 LLList result = query_evaluate(tokens_list);
@@ -69,8 +73,10 @@ void start_query_get() {
                     while (lllist_step_forward(result));
                 }
             }
+#ifdef CHECK_IF_QUERY_IS_CORRECT
             else
                 printf("Query is not correct\n");
+#endif
         }
     }
 }
